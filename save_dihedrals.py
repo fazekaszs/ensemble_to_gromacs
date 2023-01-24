@@ -9,7 +9,7 @@ from typing import List
 from Bio.PDB.PDBParser import PDBParser
 from Bio.PDB.Chain import Chain
 
-TOP_STRUCTURES = 9500
+TOP_STRUCTURES = 9000
 INPUT_FOLDER = Path("/rhome/PROTMOD/gadaneczm/GROMACS_KRas_processing/KRas-G12C_bmrb_abr/pdbs")
 
 
