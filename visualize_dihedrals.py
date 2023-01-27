@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from typing import Dict
 
-from save_dihedrals import INPUT_FOLDER
+from config import INPUT_FOLDER
 
 
 def tick_shifter(tick):

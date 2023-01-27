@@ -1,16 +1,31 @@
 import numpy as np
-import os
 import pickle
 
 from math import atan2, pi
-from pathlib import Path
-from typing import List
+
+from config import INPUT_FOLDER, RESI_IDX_SHIFT
 
 from Bio.PDB.PDBParser import PDBParser
 from Bio.PDB.Chain import Chain
 
 TOP_STRUCTURES = 9000
-INPUT_FOLDER = Path("/rhome/PROTMOD/gadaneczm/GROMACS_KRas_processing/KRas-G12C_bmrb_abr/pdbs")
+
+
+def get_filenames():
+
+    with open(INPUT_FOLDER / "score_all.sc", "r") as f:
+        scores = f.read()
+
+    scores = list(map(lambda x: (x.split(" ")[1], float(x.split(" ")[0])), scores.split("\n")[:-2]))
+    scores.sort(key=lambda x: x[1])
+    scores = scores[:TOP_STRUCTURES]
+
+    print(f"First 5 file elements: {scores[:5]}")
+    print(f"Last 5 file elements: {scores[-5:]}")
+
+    file_names = list(map(lambda x: f"{x[0]}.pdb", scores))
+
+    return file_names
 
 
 def progress_bar(percentage: float, length: int) -> str:
@@ -42,11 +57,7 @@ def get_dihedral(r1: np.ndarray, r2: np.ndarray, r3: np.ndarray, r4: np.ndarray)
 
 def main():
 
-    file_names = os.listdir(INPUT_FOLDER)
-    file_names: List[str] = list(filter(lambda x: x.endswith(".pdb"), file_names))
-    file_names.sort(key=lambda x: int(x[:-4].split("_")[-1]))
-    file_names = file_names[:TOP_STRUCTURES]
-
+    file_names = get_filenames()
     angles_dict = dict()
 
     for file_idx, file_name in enumerate(file_names):
@@ -68,8 +79,9 @@ def main():
             phi = get_dihedral(prev_c.coord, curr_n.coord, curr_ca.coord, curr_c.coord) * 180 / pi
             psi = get_dihedral(curr_n.coord, curr_ca.coord, curr_c.coord, next_n.coord) * 180 / pi
 
-            phi_key = f"{current_resi.get_segid()}-{current_resi.resname} PHI"
-            psi_key = f"{current_resi.get_segid()}-{current_resi.resname} PSI"
+            pdb_resi_id = current_resi.full_id[3][1] + RESI_IDX_SHIFT
+            phi_key = f"{pdb_resi_id}-{current_resi.resname} PHI"
+            psi_key = f"{pdb_resi_id}-{current_resi.resname} PSI"
 
             if phi_key in angles_dict:
                 angles_dict[phi_key].append(phi)
