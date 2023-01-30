@@ -26,7 +26,6 @@ def get_pdf(data: np.ndarray) -> np.ndarray:
     dmx[mask] = 360 - dmx[mask]
 
     kernel_width = KERNEL_WIDTH_SCALE * 360 / len(data) ** (1 / 3)
-    # kernel_values = np.exp(- 0.5 * (dmx / kernel_width) ** 2)
     kernel_values = kde_kernel(dmx, kernel_width)
     kernel_values = np.sum(kernel_values, axis=1) / len(data)
 
@@ -35,13 +34,10 @@ def get_pdf(data: np.ndarray) -> np.ndarray:
 
 def get_pes(data: np.ndarray) -> np.ndarray:
 
-    # data = data + 1E-5
-    # data /= np.sum(data)
-
     out = -np.log(data)
-    out_min = np.min(out)
-    out_max = np.max(out)
-    out = (out - out_min) / (out_max - out_min)
+    out_mean = np.mean(out)
+    out_std = np.std(out)
+    out = (out - out_mean) / out_std
 
     return out
 

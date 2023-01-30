@@ -38,6 +38,10 @@ def main():
         phi_pes, dphi_pes = pes_dpes_data[phi_key]
         psi_pes, dpsi_pes = pes_dpes_data[psi_key]
 
+        # Min-max scaling for visual purposes
+        phi_pes = (phi_pes - np.min(phi_pes)) / (np.max(phi_pes) - np.min(phi_pes))
+        psi_pes = (psi_pes - np.min(psi_pes)) / (np.max(psi_pes) - np.min(psi_pes))
+
         [axis.cla() for axis in ax.flatten()]
 
         ax[0, 0].plot(x_values, phi_pes, c="red")
