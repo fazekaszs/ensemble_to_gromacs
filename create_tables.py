@@ -5,7 +5,8 @@ import numpy as np
 
 from typing import List, Dict, Tuple, Iterable
 from pathlib import Path
-from config import INPUT_FOLDER, PES_DATA_TYPE, DATA_FOLDER, FORCE_CONSTANT, TOP_FILENAME, GRO_FILENAME
+from config import INPUT_FOLDER, \
+    PES_DATA_TYPE, DATA_FOLDER, TOP_FILENAME, GRO_FILENAME, PHI_FORCE_CONSTANT, PSI_FORCE_CONSTANT
 
 
 def create_id_key(ids: Iterable[int]):
@@ -132,10 +133,12 @@ def main():
         atom_ids_frset = create_id_key(atom_ids_tuple)
         top_row_idx = dih_ids_to_row_idxs[atom_ids_frset]
 
+        force_constant = PHI_FORCE_CONSTANT if angle_name.endswith(" PHI") else PSI_FORCE_CONSTANT
+
         new_row = " ".join(map(lambda x: f"{x:5d}", atom_ids_tuple))  # atom ids
         new_row += "     8"  # tabulated dihedral function type
         new_row += f" {table_idx:5d}"  # table index
-        new_row += f" {FORCE_CONSTANT}"
+        new_row += f" {force_constant}"
         new_row += f" ;{top_data[top_row_idx]}"
 
         top_data[top_row_idx] = new_row
