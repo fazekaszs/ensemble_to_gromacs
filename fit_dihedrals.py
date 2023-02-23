@@ -2,7 +2,7 @@ import pickle
 from typing import Dict
 import numpy as np
 
-from config import INPUT_FOLDER
+from config import INPUT_FOLDER, TOP_STRUCTURES
 
 DELTA_ANGLE = 1.0
 KERNEL_WIDTH_SCALE = 1
@@ -44,7 +44,7 @@ def get_pes(data: np.ndarray) -> np.ndarray:
 
 def main():
 
-    with open(INPUT_FOLDER / "../angles.pickle", "rb") as f:
+    with open(INPUT_FOLDER / f"../angles_top{TOP_STRUCTURES}.pickle", "rb") as f:
         data: Dict[str, np.ndarray] = pickle.load(f)
 
     keys = list({key[:-4] for key in data.keys()})
@@ -78,7 +78,7 @@ def main():
         fit_data[1][phi_key] = (pes_phi, dpes_phi)
         fit_data[1][psi_key] = (pes_psi, dpes_psi)
 
-    with open(INPUT_FOLDER / "../pes_dpes_data.pickle", "wb") as f:
+    with open(INPUT_FOLDER / f"../pes_dpes_data_top{TOP_STRUCTURES}.pickle", "wb") as f:
         pickle.dump(fit_data, f)
 
 

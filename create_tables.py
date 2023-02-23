@@ -5,8 +5,8 @@ import numpy as np
 
 from typing import List, Dict, Tuple, Iterable
 from pathlib import Path
-from config import INPUT_FOLDER, \
-    PES_DATA_TYPE, DATA_FOLDER, TOP_FILENAME, GRO_FILENAME, PHI_FORCE_CONSTANT, PSI_FORCE_CONSTANT
+from config import DATA_FOLDER, INPUT_FOLDER, TOP_STRUCTURES, \
+    PES_DATA_TYPE, PHI_FORCE_CONSTANT, PSI_FORCE_CONSTANT, TOP_FILENAME, GRO_FILENAME
 
 
 def create_id_key(ids: Iterable[int]):
@@ -111,7 +111,7 @@ def main():
     x_values: np.ndarray
     pes_dpes_data: PES_DATA_TYPE
 
-    with open(INPUT_FOLDER / "../pes_dpes_data.pickle", "rb") as f:
+    with open(INPUT_FOLDER / f"../pes_dpes_data_top{TOP_STRUCTURES}.pickle", "rb") as f:
         x_values, pes_dpes_data = pickle.load(f)
 
     keys = list({key[:-4] for key in pes_dpes_data.keys()})
@@ -123,8 +123,8 @@ def main():
     if not os.path.exists(INPUT_FOLDER / "../for_gmx"):
         os.mkdir(INPUT_FOLDER / "../for_gmx")
 
-    if not os.path.exists(INPUT_FOLDER / "../for_gmx/tables"):
-        os.mkdir(INPUT_FOLDER / "../for_gmx/tables")
+    if not os.path.exists(INPUT_FOLDER / f"../for_gmx/tables_top{TOP_STRUCTURES}"):
+        os.mkdir(INPUT_FOLDER / f"../for_gmx/tables_top{TOP_STRUCTURES}")
 
     for table_idx, angle_name in enumerate(resi_to_ids):
 
@@ -145,15 +145,17 @@ def main():
 
         pes_dpes_table = get_xvg(x_values, *pes_dpes_data[angle_name])
 
-        with open(INPUT_FOLDER / f"../for_gmx/tables/table_d{table_idx}.xvg", "w") as f:
+        with open(INPUT_FOLDER / f"../for_gmx/tables_top{TOP_STRUCTURES}/table_d{table_idx}.xvg", "w") as f:
             f.write(pes_dpes_table)
 
     top_data = "\n".join(top_data)
 
-    with open(INPUT_FOLDER / f"../for_gmx/new_top.top", "w") as f:
+    new_top_filename = f"{TOP_FILENAME[:-9]}_force10.new.top"  # Change this for different force constant!
+    with open(INPUT_FOLDER / f"../for_gmx/{new_top_filename}", "w") as f:
         f.write(top_data)
 
     shutil.copy(DATA_FOLDER / GRO_FILENAME, INPUT_FOLDER / "../for_gmx" / GRO_FILENAME)
+    shutil.copy(DATA_FOLDER / "../config.py", INPUT_FOLDER / f"../for_gmx/tables_top{TOP_STRUCTURES}/config.py")
 
 
 if __name__ == "__main__":

@@ -3,12 +3,10 @@ import pickle
 
 from math import atan2, pi
 
-from config import INPUT_FOLDER, RESI_IDX_SHIFT
+from config import INPUT_FOLDER, TOP_STRUCTURES, RESI_IDX_SHIFT
 
 from Bio.PDB.PDBParser import PDBParser
 from Bio.PDB.Chain import Chain
-
-TOP_STRUCTURES = 9000
 
 
 def get_filenames():
@@ -99,7 +97,7 @@ def main():
 
     angles_dict = {key: np.array(value) for key, value in angles_dict.items()}
 
-    with open(INPUT_FOLDER / "../angles.pickle", "wb") as f:
+    with open(INPUT_FOLDER / f"../angles_top{TOP_STRUCTURES}.pickle", "wb") as f:
         pickle.dump(angles_dict, f)
 
 

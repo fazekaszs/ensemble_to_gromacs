@@ -3,7 +3,7 @@ import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 
-from config import INPUT_FOLDER, PES_DATA_TYPE
+from config import INPUT_FOLDER, TOP_STRUCTURES, PES_DATA_TYPE
 
 
 def main():
@@ -11,14 +11,14 @@ def main():
     x_values: np.ndarray
     pes_dpes_data: PES_DATA_TYPE
 
-    with open(INPUT_FOLDER / "../angles.pickle", "rb") as f:
+    with open(INPUT_FOLDER / f"../angles_top{TOP_STRUCTURES}.pickle", "rb") as f:
         angle_data = pickle.load(f)
 
-    with open(INPUT_FOLDER / "../pes_dpes_data.pickle", "rb") as f:
+    with open(INPUT_FOLDER / f"../pes_dpes_data_top{TOP_STRUCTURES}.pickle", "rb") as f:
         x_values, pes_dpes_data = pickle.load(f)
 
-    if not os.path.exists(INPUT_FOLDER / "../pes_figures"):
-        os.mkdir(INPUT_FOLDER / "../pes_figures")
+    if not os.path.exists(INPUT_FOLDER / f"../pes_figures_top{TOP_STRUCTURES}"):
+        os.mkdir(INPUT_FOLDER / f"../pes_figures_top{TOP_STRUCTURES}")
 
     fig, ax = plt.subplots(2, 2)
     plt.subplots_adjust(wspace=0.5)
@@ -62,7 +62,7 @@ def main():
         ax[1, 0].plot(x_values, dphi_pes, c="blue")
         ax[1, 1].plot(x_values, dpsi_pes, c="blue")
 
-        fig.savefig(INPUT_FOLDER / f"../pes_figures/{resi_name}.png", dpi=300)
+        fig.savefig(INPUT_FOLDER / f"../pes_figures_top{TOP_STRUCTURES}/{resi_name}.png", dpi=300)
 
         print(f"{resi_name} plotting done...")
 

@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from typing import Dict
 
-from config import INPUT_FOLDER
+from config import INPUT_FOLDER, TOP_STRUCTURES
 
 
 def tick_shifter(tick):
@@ -14,7 +14,7 @@ def tick_shifter(tick):
 
 def main():
 
-    with open(INPUT_FOLDER / "../angles.pickle", "rb") as f:
+    with open(INPUT_FOLDER / f"../angles_top{TOP_STRUCTURES}.pickle", "rb") as f:
         data: Dict[str, np.ndarray] = pickle.load(f)
 
     hist_width = 2
@@ -27,8 +27,8 @@ def main():
     keys = list({key[:-4] for key in data.keys()})
     keys.sort(key=lambda x: int(x.split("-")[0]))
 
-    if not os.path.exists(INPUT_FOLDER / "../angle_figures"):
-        os.mkdir(INPUT_FOLDER / "../angle_figures")
+    if not os.path.exists(INPUT_FOLDER / f"../angle_figures_top{TOP_STRUCTURES}"):
+        os.mkdir(INPUT_FOLDER / f"../angle_figures_top{TOP_STRUCTURES}")
 
     for resi_name in keys:
 
@@ -49,17 +49,19 @@ def main():
         ax[0].set_title(resi_name + " PHI")
         ax[0].bar(plot_hist_x, hist_phi / np.max(hist_phi),
                   width=hist_width * np.pi / 180,
-                  bottom=1)
+                  bottom=1,
+                  color="cyan")
 
         ax[1].set_title(resi_name + " PSI")
         ax[1].bar(plot_hist_x, hist_psi / np.max(hist_psi),
                   width=hist_width * np.pi / 180,
-                  bottom=1)
+                  bottom=1,
+                  color="cyan")
 
         ax[0].set_yticks(ax[0].get_yticks(), labels=["" for _ in ax[0].get_yticks()])
         ax[1].set_yticks(ax[1].get_yticks(), labels=["" for _ in ax[1].get_yticks()])
 
-        fig.savefig(INPUT_FOLDER / f"../angle_figures/{resi_name}.png", dpi=300)
+        fig.savefig(INPUT_FOLDER / f"../angle_figures_top{TOP_STRUCTURES}/{resi_name}.png", dpi=300)
 
         print(f"{resi_name} done...")
 
