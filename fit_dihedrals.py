@@ -1,8 +1,8 @@
 import pickle
-from typing import Dict
+from typing import Dict, List
 import numpy as np
 
-from config import INPUT_FOLDER, TOP_STRUCTURES
+from config import INPUT_FOLDER, SCORE_SCALE
 
 DELTA_ANGLE = 1.0
 KERNEL_WIDTH_SCALE = 1
@@ -17,7 +17,7 @@ def kde_kernel(distances: np.ndarray, kernel_width: float):
     return kernel_values
 
 
-def get_pdf(data: np.ndarray) -> np.ndarray:
+def get_pdf(data: np.ndarray, scores: np.ndarray, score_scale: float) -> np.ndarray:
 
     ref_points = np.arange(-180, 180, DELTA_ANGLE)
 
@@ -25,14 +25,17 @@ def get_pdf(data: np.ndarray) -> np.ndarray:
     mask = dmx > 180
     dmx[mask] = 360 - dmx[mask]
 
+    weights = np.exp(-scores / score_scale)
+    weights /= np.sum(weights)
+
     kernel_width = KERNEL_WIDTH_SCALE * 360 / len(data) ** (1 / 3)
     kernel_values = kde_kernel(dmx, kernel_width)
-    kernel_values = np.sum(kernel_values, axis=1) / len(data)
+    kernel_values = np.sum(kernel_values * weights, axis=1)
 
     return kernel_values
 
 
-def get_pes(data: np.ndarray) -> np.ndarray:
+def get_pef(data: np.ndarray) -> np.ndarray:
 
     out = -np.log(data)
     out_mean = np.mean(out)
@@ -42,10 +45,24 @@ def get_pes(data: np.ndarray) -> np.ndarray:
     return out
 
 
+def progress_bar(percentage: float, length: int) -> str:
+
+    n_of_hashtags = int(percentage * length)
+
+    out = "["
+    out += n_of_hashtags * "#"
+    out += (length - n_of_hashtags) * " "
+    out += "]"
+    out += f" {percentage:.2%}"
+    return out
+
+
 def main():
 
-    with open(INPUT_FOLDER / f"../angles_top{TOP_STRUCTURES}.pickle", "rb") as f:
-        data: Dict[str, np.ndarray] = pickle.load(f)
+    with open(INPUT_FOLDER / f"../angles_csr.pickle", "rb") as f:
+        data: Dict[str, np.ndarray]
+        scores: np.ndarray
+        data, scores = pickle.load(f)
 
     keys = list({key[:-4] for key in data.keys()})
     keys.sort(key=lambda x: int(x.split("-")[0]))
@@ -54,8 +71,10 @@ def main():
 
     fit_data = (x_values, dict())
 
+    print("Fitting PEF...")
+
     resi_name: str
-    for resi_name in keys:
+    for counter, resi_name in enumerate(keys):
 
         phi_key = resi_name + " PHI"
         psi_key = resi_name + " PSI"
@@ -63,22 +82,26 @@ def main():
         data_phi = data[phi_key]
         data_psi = data[psi_key]
 
-        pdf_phi = get_pdf(data_phi)
-        pdf_psi = get_pdf(data_psi)
+        pdf_phi = get_pdf(data_phi, scores, SCORE_SCALE)
+        pdf_psi = get_pdf(data_psi, scores, SCORE_SCALE)
 
-        pes_phi = get_pes(pdf_phi)
-        pes_psi = get_pes(pdf_psi)
+        pef_phi = get_pef(pdf_phi)
+        pef_psi = get_pef(pdf_psi)
 
-        dpes_phi = pes_phi[1:] - pes_phi[:-1]
-        dpes_phi = np.append(dpes_phi, (dpes_phi[0] + dpes_phi[-1]) / 2) / DELTA_ANGLE
+        dpef_phi = pef_phi[1:] - pef_phi[:-1]
+        dpef_phi = np.append(dpef_phi, (dpef_phi[0] + dpef_phi[-1]) / 2) / DELTA_ANGLE
 
-        dpes_psi = pes_psi[1:] - pes_psi[:-1]
-        dpes_psi = np.append(dpes_psi, (dpes_psi[0] + dpes_psi[-1]) / 2) / DELTA_ANGLE
+        dpef_psi = pef_psi[1:] - pef_psi[:-1]
+        dpef_psi = np.append(dpef_psi, (dpef_psi[0] + dpef_psi[-1]) / 2) / DELTA_ANGLE
 
-        fit_data[1][phi_key] = (pes_phi, dpes_phi)
-        fit_data[1][psi_key] = (pes_psi, dpes_psi)
+        fit_data[1][phi_key] = (pef_phi, dpef_phi)
+        fit_data[1][psi_key] = (pef_psi, dpef_psi)
 
-    with open(INPUT_FOLDER / f"../pes_dpes_data_top{TOP_STRUCTURES}.pickle", "wb") as f:
+        print("\r", end="")
+        print(progress_bar((counter+1) / len(keys), 30), end=", ")
+        print(f"{resi_name} is done...", end="")
+
+    with open(INPUT_FOLDER / f"../pef_dpef_data_scoreScale{SCORE_SCALE:.0f}.pickle", "wb") as f:
         pickle.dump(fit_data, f)
 
 

@@ -5,8 +5,8 @@ import numpy as np
 
 from typing import List, Dict, Tuple, Iterable
 from pathlib import Path
-from config import DATA_FOLDER, INPUT_FOLDER, TOP_STRUCTURES, \
-    PES_DATA_TYPE, PHI_FORCE_CONSTANT, PSI_FORCE_CONSTANT, TOP_FILENAME, GRO_FILENAME
+from config import DATA_FOLDER, INPUT_FOLDER, FORCE_SCALE, SCORE_SCALE, \
+    PEF_DATA_TYPE, PHI_FORCE_CONSTANT, PSI_FORCE_CONSTANT, TOP_FILENAME, GRO_FILENAME
 
 
 def create_id_key(ids: Iterable[int]):
@@ -106,12 +106,24 @@ def get_xvg(ref_points: np.ndarray, pes_data: np.ndarray, dpes_data: np.ndarray)
     return out
 
 
+def progress_bar(percentage: float, length: int) -> str:
+
+    n_of_hashtags = int(percentage * length)
+
+    out = "["
+    out += n_of_hashtags * "#"
+    out += (length - n_of_hashtags) * " "
+    out += "]"
+    out += f" {percentage:.2%}"
+    return out
+
+
 def main():
 
     x_values: np.ndarray
-    pes_dpes_data: PES_DATA_TYPE
+    pes_dpes_data: PEF_DATA_TYPE
 
-    with open(INPUT_FOLDER / f"../pes_dpes_data_top{TOP_STRUCTURES}.pickle", "rb") as f:
+    with open(INPUT_FOLDER / f"../pes_dpes_data_scoreScale{SCORE_SCALE:.0f}.pickle", "rb") as f:
         x_values, pes_dpes_data = pickle.load(f)
 
     keys = list({key[:-4] for key in pes_dpes_data.keys()})
@@ -123,8 +135,10 @@ def main():
     if not os.path.exists(INPUT_FOLDER / "../for_gmx"):
         os.mkdir(INPUT_FOLDER / "../for_gmx")
 
-    if not os.path.exists(INPUT_FOLDER / f"../for_gmx/tables_top{TOP_STRUCTURES}"):
-        os.mkdir(INPUT_FOLDER / f"../for_gmx/tables_top{TOP_STRUCTURES}")
+    if not os.path.exists(INPUT_FOLDER / f"../for_gmx/tables_scoreScale{SCORE_SCALE:.0f}"):
+        os.mkdir(INPUT_FOLDER / f"../for_gmx/tables_scoreScale{SCORE_SCALE:.0f}")
+
+    print("Writing tables...")
 
     for table_idx, angle_name in enumerate(resi_to_ids):
 
@@ -145,17 +159,22 @@ def main():
 
         pes_dpes_table = get_xvg(x_values, *pes_dpes_data[angle_name])
 
-        with open(INPUT_FOLDER / f"../for_gmx/tables_top{TOP_STRUCTURES}/table_d{table_idx}.xvg", "w") as f:
+        with open(INPUT_FOLDER / f"../for_gmx/tables_scoreScale{SCORE_SCALE:.0f}/table_d{table_idx}.xvg", "w") as f:
             f.write(pes_dpes_table)
+
+        print("\r", end="")
+        print(progress_bar((table_idx+1) / len(resi_to_ids), 30), end=", ")
+        print(f"Filename {angle_name} done...", end="")
 
     top_data = "\n".join(top_data)
 
-    new_top_filename = f"{TOP_FILENAME[:-9]}_force10.new.top"  # Change this for different force constant!
+    # new_top_filename = f"{TOP_FILENAME[:-9]}_f{FORCE_SCALE:.0f}_sc{SCORE_SCALE:.0f}.new.top"
+    new_top_filename = f"{TOP_FILENAME[:-9]}.new.top"
     with open(INPUT_FOLDER / f"../for_gmx/{new_top_filename}", "w") as f:
         f.write(top_data)
 
     shutil.copy(DATA_FOLDER / GRO_FILENAME, INPUT_FOLDER / "../for_gmx" / GRO_FILENAME)
-    shutil.copy(DATA_FOLDER / "../config.py", INPUT_FOLDER / f"../for_gmx/tables_top{TOP_STRUCTURES}/config.py")
+    shutil.copy(DATA_FOLDER / "../config.py", INPUT_FOLDER / f"../for_gmx/tables_scoreScale{SCORE_SCALE:.0f}/config.py")
 
 
 if __name__ == "__main__":
