@@ -1,5 +1,5 @@
 # ensemble_to_gromacs
-These scripts can be used to analyse the Phi and Psi dihedral (or torsion) angle distribution in a protein structural ensemble (e.g. from Chemical Shift-Rosetta), and to define potential energy functions (PEFs) exchange for the original torsional energy terms in GROMACS for a molecular dynamisc (MD) simulation.
+These scripts can be used to analyse the Phi and Psi dihedral (or torsion) angle distribution in a protein structural ensemble (e.g. from Chemical Shift-Rosetta), and to define potential energy functions (PEFs), to exchange them for the original torsional energy terms in GROMACS for a molecular dynamisc (MD) simulation.
 
 1. You can adjust your settings in the "config.py" file first. (Detailed description will be available later.)
 2. The dihedral angles in your ensemble can be measured and saved to a pickle using "save_dihedrals.py".
