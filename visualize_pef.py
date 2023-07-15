@@ -6,7 +6,8 @@ import matplotlib.patches as mpatches
 
 from config import INPUT_FOLDER, SCORE_SCALE, PEF_DATA_TYPE
 
-hist_color_csr = hist_color_gmx = "blue"
+hist_color_csr = "blue"
+TAG = ""
 
 
 def progress_bar(percentage: float, length: int) -> str:
@@ -32,17 +33,19 @@ def main():
     with open(INPUT_FOLDER / f"../pef_dpef_data_scoreScale{SCORE_SCALE:.0f}.pickle", "rb") as f:
         x_values, pef_dpef_data = pickle.load(f)
 
-    if not os.path.exists(INPUT_FOLDER / f"../pef_figures_scoreScale{SCORE_SCALE:.0f}"):
-        os.mkdir(INPUT_FOLDER / f"../pef_figures_scoreScale{SCORE_SCALE:.0f}")
+    if not os.path.exists(INPUT_FOLDER / f"../pef_figures_scoreScale{SCORE_SCALE:.0f}{TAG}"):
+        os.mkdir(INPUT_FOLDER / f"../pef_figures_scoreScale{SCORE_SCALE:.0f}{TAG}")
 
     fig, ax = plt.subplots(2, 2)
     plt.subplots_adjust(wspace=0.5)
 
     pef_patch = mpatches.Patch(color="red", label="PEF [-]")
-    single_patches = mpatches.Patch(color="green", label="single occurrence")
+    single_patches = mpatches.Patch(color="purple", label="single occurrence")
     dpef_patch = mpatches.Patch(color="orange", label="derivative of PEF [-]")
     hist_patch = mpatches.Patch(color=hist_color_csr, label="CS-Rosetta dihedral angle distribution")
     # hist_gmx_patch = mpatches.Patch(color=hist_color_gmx, label="MD refined dihedral angle distribution")
+
+    fig.text(0.5, 0.20, "dihedral angle [degree] ", ha="center", fontsize=12)
 
     hist_width = 2
     hist_x = np.arange(-180, 180 + hist_width, hist_width)
@@ -70,8 +73,8 @@ def main():
         ax[0, 0].plot(x_values, phi_pef, c="red")
         ax[0, 1].plot(x_values, psi_pef, c="red")
 
-        ax[0, 0].scatter(angle_data[phi_key], np.ones_like(angle_data[phi_key]), alpha=0.3, c="green", marker="|")
-        ax[0, 1].scatter(angle_data[psi_key], np.ones_like(angle_data[psi_key]), alpha=0.3, c="green", marker="|")
+        ax[0, 0].scatter(angle_data[phi_key], np.ones_like(angle_data[phi_key]), alpha=0.3, c="purple", marker="|")
+        ax[0, 1].scatter(angle_data[psi_key], np.ones_like(angle_data[psi_key]), alpha=0.3, c="purple", marker="|")
 
         hist_phi_y, _ = np.histogram(angle_data[phi_key], bins=hist_x)
         hist_psi_y, _ = np.histogram(angle_data[psi_key], bins=hist_x)
@@ -81,8 +84,8 @@ def main():
 
         sep_pos = resi_name.find("-")
         resi_name_back = f"{resi_name[-3:]}-{resi_name[:sep_pos]}"
-        ax[0, 0].set_title(resi_name_back + " $\\phi$")
-        ax[0, 1].set_title(resi_name_back + " $\\psi$")
+        ax[0, 0].set_title(resi_name_back + " $\mathrm{{\phi}}$", fontsize=15)
+        ax[0, 1].set_title(resi_name_back + " $\mathrm{{\psi}}$", fontsize=15)
 
         ax[1, 0].plot(x_values, dphi_pef, c="orange")
         ax[1, 1].plot(x_values, dpsi_pef, c="orange")
@@ -92,16 +95,17 @@ def main():
                    loc="lower center",
                    bbox_transform=fig.transFigure,
                    ncol=2,
-                   bbox_to_anchor=(0.5, 0.05))
+                   bbox_to_anchor=(0.5, 0.05),
+                   fontsize=12)
         plt.subplots_adjust(bottom=0.3)
-        fig.text(0.5, 0.22, "dihedral angle [degree] ", ha="center")
 
         plt.subplots_adjust(wspace=0.5)
 
+        #plt.show()
         fig.savefig(INPUT_FOLDER / f"../pef_figures_scoreScale{SCORE_SCALE:.0f}{TAG}/{resi_name}.png", dpi=300)
 
         print("\r", end="")
-        print(progress_bar((counter+1) / len(keys), 30), end=", ")
+        print(progress_bar((counter + 1) / len(keys), 30), end=", ")
         print(f"Filename {resi_name} done...", end="")
 
 
