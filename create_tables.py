@@ -123,7 +123,7 @@ def main():
     x_values: np.ndarray
     pes_dpes_data: PEF_DATA_TYPE
 
-    with open(INPUT_FOLDER / f"../pes_dpes_data_scoreScale{SCORE_SCALE:.0f}.pickle", "rb") as f:
+    with open(DATA_FOLDER / f"pef_dpef_data_scoreScale{SCORE_SCALE:.0f}.pickle", "rb") as f:
         x_values, pes_dpes_data = pickle.load(f)
 
     keys = list({key[:-4] for key in pes_dpes_data.keys()})
@@ -132,11 +132,11 @@ def main():
     resi_to_ids = parse_gro(DATA_FOLDER / GRO_FILENAME, keys)
     top_data, dih_ids_to_row_idxs = parse_top(DATA_FOLDER / TOP_FILENAME)
 
-    if not os.path.exists(INPUT_FOLDER / "../for_gmx"):
-        os.mkdir(INPUT_FOLDER / "../for_gmx")
+    if not os.path.exists(DATA_FOLDER / "for_gmx"):
+        os.mkdir(DATA_FOLDER / "for_gmx")
 
-    if not os.path.exists(INPUT_FOLDER / f"../for_gmx/tables_scoreScale{SCORE_SCALE:.0f}"):
-        os.mkdir(INPUT_FOLDER / f"../for_gmx/tables_scoreScale{SCORE_SCALE:.0f}")
+    if not os.path.exists(DATA_FOLDER / f"for_gmx/tables_scoreScale{SCORE_SCALE:.0f}"):
+        os.mkdir(DATA_FOLDER / f"for_gmx/tables_scoreScale{SCORE_SCALE:.0f}")
 
     print("Writing tables...")
 
@@ -159,7 +159,7 @@ def main():
 
         pes_dpes_table = get_xvg(x_values, *pes_dpes_data[angle_name])
 
-        with open(INPUT_FOLDER / f"../for_gmx/tables_scoreScale{SCORE_SCALE:.0f}/table_d{table_idx}.xvg", "w") as f:
+        with open(DATA_FOLDER / f"for_gmx/tables_scoreScale{SCORE_SCALE:.0f}/table_d{table_idx}.xvg", "w") as f:
             f.write(pes_dpes_table)
 
         print("\r", end="")
@@ -168,13 +168,12 @@ def main():
 
     top_data = "\n".join(top_data)
 
-    # new_top_filename = f"{TOP_FILENAME[:-9]}_f{FORCE_SCALE:.0f}_sc{SCORE_SCALE:.0f}.new.top"
     new_top_filename = f"{TOP_FILENAME[:-9]}.new.top"
-    with open(INPUT_FOLDER / f"../for_gmx/{new_top_filename}", "w") as f:
+    with open(DATA_FOLDER / f"for_gmx/{new_top_filename}", "w") as f:
         f.write(top_data)
 
-    shutil.copy(DATA_FOLDER / GRO_FILENAME, INPUT_FOLDER / "../for_gmx" / GRO_FILENAME)
-    shutil.copy(DATA_FOLDER / "../config.py", INPUT_FOLDER / f"../for_gmx/tables_scoreScale{SCORE_SCALE:.0f}/config.py")
+    shutil.copy(DATA_FOLDER / GRO_FILENAME, DATA_FOLDER / "for_gmx" / GRO_FILENAME)
+    shutil.copy(DATA_FOLDER / "../../../config.py", DATA_FOLDER / f"for_gmx/tables_scoreScale{SCORE_SCALE:.0f}/config.py")
 
 
 if __name__ == "__main__":

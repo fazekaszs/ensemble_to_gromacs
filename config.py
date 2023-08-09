@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Tuple, Dict
 
 # Set the datafolder:
-DATA_FOLDER = Path("/rhome/PROTMOD/gadaneczm/GROMACS_KRas_processing/data/KRas-G12C/KRas-G12C_bmrb_abr/")
+DATA_FOLDER = Path("/rhome/PROTMOD/gadaneczm/GROMACS_KRas_processing/data/KRas-G12V/kras_g12v_gdp_mg_abr/")
 INPUT_FOLDER = DATA_FOLDER / "pdbs"
 # TOP_STRUCTURES = 9000
 
@@ -18,5 +18,5 @@ PHI_FORCE_CONSTANT = 1.477 * FORCE_SCALE
 PSI_FORCE_CONSTANT = 0.530 * FORCE_SCALE
 
 # Filename of the .gro file and the topology (.top) file, which will be modified
-GRO_FILENAME = "kras_g12c_gdp_mg.solv.ions.gro"
-TOP_FILENAME = "kras_g12c_gdp_mg.full.top"
+GRO_FILENAME = "kras_g12v_gdp_mg.solv.ions.gro"
+TOP_FILENAME = "kras_g12v_gdp_mg.full.top"

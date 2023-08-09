@@ -4,8 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from typing import Dict
 
-from config import INPUT_FOLDER, SCORE_SCALE
+from config import DATA_FOLDER
 HIST_COLOR = "blue"
+
 
 def tick_shifter(tick):
 
@@ -26,7 +27,7 @@ def progress_bar(percentage: float, length: int) -> str:
 
 def main():
 
-    with open(INPUT_FOLDER / f"../angles_csr.pickle", "rb") as f:
+    with open(DATA_FOLDER / f"angles_csr.pickle", "rb") as f:
         data: Dict[str, np.ndarray]
         data, _ = pickle.load(f)
 
@@ -40,8 +41,8 @@ def main():
     keys = list({key[:-4] for key in data.keys()})
     keys.sort(key=lambda x: int(x.split("-")[0]))
 
-    if not os.path.exists(INPUT_FOLDER / f"../angle_figures_csr"):
-        os.mkdir(INPUT_FOLDER / f"../angle_figures_csr")
+    if not os.path.exists(DATA_FOLDER / f"angle_figures_csr"):
+        os.mkdir(DATA_FOLDER / f"angle_figures_csr")
 
     print("Saving figures...")
     for counter, resi_name in enumerate(keys):
@@ -75,7 +76,7 @@ def main():
         ax[0].set_yticks(ax[0].get_yticks(), labels=["" for _ in ax[0].get_yticks()])
         ax[1].set_yticks(ax[1].get_yticks(), labels=["" for _ in ax[1].get_yticks()])
 
-        fig.savefig(INPUT_FOLDER / f"../angle_figures_csr/{resi_name}.png", dpi=300)
+        fig.savefig(DATA_FOLDER / f"angle_figures_csr/{resi_name}.png", dpi=300)
 
         print("\r", end="")
         print(progress_bar((counter+1) / len(keys), 30), end=", ")

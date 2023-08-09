@@ -2,7 +2,7 @@ import pickle
 from typing import Dict, List
 import numpy as np
 
-from config import INPUT_FOLDER, SCORE_SCALE
+from config import DATA_FOLDER, SCORE_SCALE
 
 DELTA_ANGLE = 1.0
 KERNEL_WIDTH_SCALE = 1
@@ -59,7 +59,7 @@ def progress_bar(percentage: float, length: int) -> str:
 
 def main():
 
-    with open(INPUT_FOLDER / f"../angles_csr.pickle", "rb") as f:
+    with open(DATA_FOLDER / f"angles_csr.pickle", "rb") as f:
         data: Dict[str, np.ndarray]
         scores: np.ndarray
         data, scores = pickle.load(f)
@@ -101,7 +101,7 @@ def main():
         print(progress_bar((counter+1) / len(keys), 30), end=", ")
         print(f"{resi_name} is done...", end="")
 
-    with open(INPUT_FOLDER / f"../pef_dpef_data_scoreScale{SCORE_SCALE:.0f}.pickle", "wb") as f:
+    with open(DATA_FOLDER / f"pef_dpef_data_scoreScale{SCORE_SCALE:.0f}.pickle", "wb") as f:
         pickle.dump(fit_data, f)
 
 

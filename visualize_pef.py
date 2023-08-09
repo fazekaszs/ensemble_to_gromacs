@@ -4,10 +4,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
-from config import INPUT_FOLDER, SCORE_SCALE, PEF_DATA_TYPE
+from config import DATA_FOLDER, SCORE_SCALE, PEF_DATA_TYPE
 
-hist_color_csr = "blue"
+hist_color_csr = "cyan"
 TAG = ""
+LABEL = False
 
 
 def progress_bar(percentage: float, length: int) -> str:
@@ -27,25 +28,25 @@ def main():
     x_values: np.ndarray
     pef_dpef_data: PEF_DATA_TYPE
 
-    with open(INPUT_FOLDER / f"../angles_csr.pickle", "rb") as f:
+    with open(DATA_FOLDER / f"angles_csr.pickle", "rb") as f:
         angle_data, _ = pickle.load(f)
 
-    with open(INPUT_FOLDER / f"../pef_dpef_data_scoreScale{SCORE_SCALE:.0f}.pickle", "rb") as f:
+    with open(DATA_FOLDER / f"pef_dpef_data_scoreScale{SCORE_SCALE:.0f}.pickle", "rb") as f:
         x_values, pef_dpef_data = pickle.load(f)
 
-    if not os.path.exists(INPUT_FOLDER / f"../pef_figures_scoreScale{SCORE_SCALE:.0f}{TAG}"):
-        os.mkdir(INPUT_FOLDER / f"../pef_figures_scoreScale{SCORE_SCALE:.0f}{TAG}")
+    if not os.path.exists(DATA_FOLDER / f"pef_figures_scoreScale{SCORE_SCALE:.0f}{TAG}"):
+        os.mkdir(DATA_FOLDER / f"pef_figures_scoreScale{SCORE_SCALE:.0f}{TAG}")
 
     fig, ax = plt.subplots(2, 2)
     plt.subplots_adjust(wspace=0.5)
+    # plt.subplots_adjust(bottom=0.3)
 
     pef_patch = mpatches.Patch(color="red", label="PEF [-]")
     single_patches = mpatches.Patch(color="purple", label="single occurrence")
     dpef_patch = mpatches.Patch(color="orange", label="derivative of PEF [-]")
     hist_patch = mpatches.Patch(color=hist_color_csr, label="CS-Rosetta dihedral angle distribution")
-    # hist_gmx_patch = mpatches.Patch(color=hist_color_gmx, label="MD refined dihedral angle distribution")
 
-    fig.text(0.5, 0.20, "dihedral angle [degree] ", ha="center", fontsize=12)
+    fig.text(0.5, 0.01, "dihedral angle [degree] ", ha="center", fontsize=14)
 
     hist_width = 2
     hist_x = np.arange(-180, 180 + hist_width, hist_width)
@@ -84,25 +85,27 @@ def main():
 
         sep_pos = resi_name.find("-")
         resi_name_back = f"{resi_name[-3:]}-{resi_name[:sep_pos]}"
-        ax[0, 0].set_title(resi_name_back + " $\mathrm{{\phi}}$", fontsize=15)
-        ax[0, 1].set_title(resi_name_back + " $\mathrm{{\psi}}$", fontsize=15)
+        ax[0, 0].set_title(resi_name_back + " $\mathrm{{\phi}}$", fontsize=15, y=1.05)
+        ax[0, 1].set_title(resi_name_back + " $\mathrm{{\psi}}$", fontsize=15, y=1.05)
 
         ax[1, 0].plot(x_values, dphi_pef, c="orange")
         ax[1, 1].plot(x_values, dpsi_pef, c="orange")
 
+        ax[0, 0].tick_params(axis="both", labelsize=12)
+        ax[0, 1].tick_params(axis="both", labelsize=12)
+        ax[1, 0].tick_params(axis="both", labelsize=12)
+        ax[1, 1].tick_params(axis="both", labelsize=12)
 
-        plt.legend(handles=[single_patches, pef_patch, dpef_patch, hist_patch],  #hist_gmx_patch],
-                   loc="lower center",
-                   bbox_transform=fig.transFigure,
-                   ncol=2,
-                   bbox_to_anchor=(0.5, 0.05),
-                   fontsize=12)
-        plt.subplots_adjust(bottom=0.3)
-
-        plt.subplots_adjust(wspace=0.5)
+        if LABEL:
+            plt.legend(handles=[single_patches, pef_patch, dpef_patch, hist_patch],
+                       loc="lower center",
+                       bbox_transform=fig.transFigure,
+                       ncol=2,
+                       bbox_to_anchor=(0.5, 0.05),
+                       fontsize=10)
 
         #plt.show()
-        fig.savefig(INPUT_FOLDER / f"../pef_figures_scoreScale{SCORE_SCALE:.0f}{TAG}/{resi_name}.png", dpi=300)
+        fig.savefig(DATA_FOLDER / f"pef_figures_scoreScale{SCORE_SCALE:.0f}{TAG}/{resi_name}.png", dpi=300)
 
         print("\r", end="")
         print(progress_bar((counter + 1) / len(keys), 30), end=", ")
